@@ -10,6 +10,8 @@ export default function Navigation() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/farm-models", label: "Farm Models" },
+    { href: "/about", label: "About" },
+    { href: "/vision", label: "Our Vision" },
     { href: "/contact", label: "Contact" },
   ];
 

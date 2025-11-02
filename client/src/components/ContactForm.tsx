@@ -49,18 +49,35 @@ export default function ContactForm() {
 
   async function onSubmit(data: ContactFormData) {
     setIsSubmitting(true);
-    console.log("Form submitted:", data);
     
-    // TODO: Remove mock functionality - replace with actual API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Thank you for your interest!",
-      description: "We'll contact you within 24 hours to discuss your farm model.",
-    });
-    
-    form.reset();
-    setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+
+      toast({
+        title: "Thank you for your interest!",
+        description: "We'll contact you within 24 hours to discuss your farm model.",
+      });
+      
+      form.reset();
+    } catch (error) {
+      toast({
+        title: "Submission failed",
+        description: "Please try again or contact us directly at heritagehubnepal@gmail.com",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

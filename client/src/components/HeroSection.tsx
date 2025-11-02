@@ -12,6 +12,9 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(30,60,40,0.85)] to-transparent" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center pt-16">
+        <div className="text-white/80 text-sm sm:text-base mb-4 uppercase tracking-wide">
+          Heritage Hub Nepal — Sustainable Ventures Across Nepal
+        </div>
         <h1
           className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-6"
           data-testid="text-hero-headline"
@@ -19,10 +22,13 @@ export default function HeroSection() {
           Turn Your 5 Anna Into NPR 120,000/Year
         </h1>
         <p
-          className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg sm:text-xl text-white/90 mb-2 max-w-2xl mx-auto leading-relaxed"
           data-testid="text-hero-subtitle"
         >
           Bamboo-powered mushroom farms • Managed or DIY • Guaranteed yield
+        </p>
+        <p className="text-sm text-white/70 mb-8">
+          Starting with mushroom farming — our first sustainable success story
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
