@@ -47,16 +47,29 @@ export default function ContactForm() {
     },
   });
 
+  function encode(data: Record<string, string>) {
+    return Object.keys(data)
+      .map((key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+      .join("&");
+  }
+
   async function onSubmit(data: ContactFormData) {
     setIsSubmitting(true);
-    
+
     try {
-      const response = await fetch("/api/contact", {
+      const body = encode({
+        "form-name": "contact",
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        landSize: data.landSize,
+        modelPreference: data.modelPreference,
+      });
+
+      const response = await fetch("/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
       });
 
       if (!response.ok) {
@@ -67,12 +80,13 @@ export default function ContactForm() {
         title: "Thank you for your interest!",
         description: "We'll contact you within 24 hours to discuss your farm model.",
       });
-      
+
       form.reset();
     } catch (error) {
       toast({
         title: "Submission failed",
-        description: "Please try again or contact us directly at heritagehubnepal@gmail.com",
+        description:
+          "Please try again or contact us directly at heritagehubnepal@gmail.com",
         variant: "destructive",
       });
     } finally {
@@ -94,7 +108,17 @@ export default function ContactForm() {
 
         <Card className="p-8 sm:p-10 shadow-xl">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              name="contact"
+              method="POST"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
+              <input type="hidden" name="form-name" value="contact" />
+              {/* Netlify honeypot field */}
+              <input type="hidden" name="bot-field" />
               <FormField
                 control={form.control}
                 name="name"
@@ -108,6 +132,7 @@ export default function ContactForm() {
                         placeholder="Enter your name"
                         className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
                         data-testid="input-name"
+                        name="name"
                         {...field}
                       />
                     </FormControl>
@@ -129,6 +154,7 @@ export default function ContactForm() {
                         placeholder="9800000000"
                         className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
                         data-testid="input-phone"
+                        name="phone"
                         {...field}
                       />
                     </FormControl>
@@ -151,6 +177,7 @@ export default function ContactForm() {
                         placeholder="your.email@example.com"
                         className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
                         data-testid="input-email"
+                        name="email"
                         {...field}
                       />
                     </FormControl>
