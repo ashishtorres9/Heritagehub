@@ -19,8 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Link } from "wouter";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -28,13 +35,18 @@ const contactSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   landSize: z.string().min(1, "Please select land size"),
   modelPreference: z.string().min(1, "Please select a model preference"),
+  leadSource: z.string().optional(),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-export default function ContactForm() {
+interface ContactFormProps {
+  source?: string;
+}
+
+export default function ContactForm({ source = "contact" }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -44,95 +56,59 @@ export default function ContactForm() {
       email: "",
       landSize: "",
       modelPreference: "",
+      leadSource: source,
     },
   });
 
-  function encode(data: Record<string, string>) {
-    return Object.keys(data)
-      .map((key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-      .join("&");
-  }
-
   async function onSubmit(data: ContactFormData) {
     setIsSubmitting(true);
-
     try {
-      const body = encode({
-        "form-name": "contact",
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        landSize: data.landSize,
-        modelPreference: data.modelPreference,
-      });
-
-      const response = await fetch("/", {
+      const response = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to submit form");
-      }
+      if (!response.ok) throw new Error("Failed to submit form");
 
-      toast({
-        title: "Thank you for your interest!",
-        description: "We'll contact you within 24 hours to discuss your farm model.",
-      });
-
+      setIsSuccessDialogOpen(true);
       form.reset();
     } catch (error) {
-      toast({
-        title: "Submission failed",
-        description:
-          "Please try again or contact us directly at heritagehubnepal@gmail.com",
-        variant: "destructive",
-      });
+      alert("Submission failed. Please email us at heritagehubnepal@gmail.com");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-[#F8F4E9]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-foreground mb-4">
+          <h2 className="font-serif text-[40px] font-semibold text-[#1A3A2A] mb-4">
             Get Your Free Assessment
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-[#6B5D56]">
             Share your details and we'll help you choose the perfect farm model
           </p>
         </div>
 
-        <Card className="p-8 sm:p-10 shadow-xl">
+        <Card className="p-8 sm:p-10 shadow-xl bg-white">
           <Form {...form}>
-            <form
-              name="contact"
-              method="POST"
-              data-netlify="true"
-              netlify-honeypot="bot-field"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              <input type="hidden" name="form-name" value="contact" />
-              {/* Netlify honeypot field */}
-              <input type="hidden" name="bot-field" />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <input type="hidden" name="leadSource" value={source} />
+
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-muted-foreground">
+                    <FormLabel className="text-[14px] font-medium text-[#6B5D56] uppercase tracking-wide">
                       Full Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter your name"
-                        className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
-                        data-testid="input-name"
-                        name="name"
+                        className="w-full bg-[#F8F4E9] border border-[#E0E0E0] focus:border-[#2E5E3E] rounded-lg py-3 px-4"
                         {...field}
                       />
                     </FormControl>
@@ -146,15 +122,13 @@ export default function ContactForm() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-muted-foreground">
+                    <FormLabel className="text-[14px] font-medium text-[#6B5D56] uppercase tracking-wide">
                       Phone Number
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="9800000000"
-                        className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
-                        data-testid="input-phone"
-                        name="phone"
+                        className="w-full bg-[#F8F4E9] border border-[#E0E0E0] focus:border-[#2E5E3E] rounded-lg py-3 px-4"
                         {...field}
                       />
                     </FormControl>
@@ -168,16 +142,14 @@ export default function ContactForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-muted-foreground">
+                    <FormLabel className="text-[14px] font-medium text-[#6B5D56] uppercase tracking-wide">
                       Email Address
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="your.email@example.com"
-                        className="bg-accent border-input focus:border-primary rounded-lg py-3 px-4"
-                        data-testid="input-email"
-                        name="email"
+                        className="w-full bg-[#F8F4E9] border border-[#E0E0E0] focus:border-[#2E5E3E] rounded-lg py-3 px-4"
                         {...field}
                       />
                     </FormControl>
@@ -191,18 +163,12 @@ export default function ContactForm() {
                 name="landSize"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-muted-foreground">
+                    <FormLabel className="text-[14px] font-medium text-[#6B5D56] uppercase tracking-wide">
                       Available Land Size
                     </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger
-                          className="bg-accent border-input rounded-lg py-3 px-4"
-                          data-testid="select-land-size"
-                        >
+                        <SelectTrigger className="w-full bg-[#F8F4E9] border border-[#E0E0E0] rounded-lg py-3 px-4">
                           <SelectValue placeholder="Select land size" />
                         </SelectTrigger>
                       </FormControl>
@@ -223,29 +189,19 @@ export default function ContactForm() {
                 name="modelPreference"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-muted-foreground">
+                    <FormLabel className="text-[14px] font-medium text-[#6B5D56] uppercase tracking-wide">
                       Model Preference
                     </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger
-                          className="bg-accent border-input rounded-lg py-3 px-4"
-                          data-testid="select-model-preference"
-                        >
+                        <SelectTrigger className="w-full bg-[#F8F4E9] border border-[#E0E0E0] rounded-lg py-3 px-4">
                           <SelectValue placeholder="Select preference" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="self">Self-Managed</SelectItem>
-                        <SelectItem value="managed">
-                          Heritage Hub Managed
-                        </SelectItem>
-                        <SelectItem value="undecided">
-                          Need Consultation
-                        </SelectItem>
+                        <SelectItem value="managed">Heritage Hub Managed</SelectItem>
+                        <SelectItem value="undecided">Need Consultation</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -255,9 +211,8 @@ export default function ContactForm() {
 
               <Button
                 type="submit"
-                className="w-full sm:w-auto bg-destructive text-destructive-foreground hover-elevate active-elevate-2 px-8 py-4 rounded-lg"
                 disabled={isSubmitting}
-                data-testid="button-submit-contact"
+                className="w-full sm:w-auto bg-[#C44536] text-white px-8 py-4 rounded-lg hover-elevate active-elevate-2"
               >
                 {isSubmitting ? "Submitting..." : "Submit Assessment Request"}
               </Button>
@@ -265,6 +220,50 @@ export default function ContactForm() {
           </Form>
         </Card>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-[#1A3A2A]">
+              Thank You!
+            </DialogTitle>
+            <DialogDescription className="text-[#6B5D56] mt-2">
+              Your free farm assessment request has been received.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <p className="text-sm text-[#6B5D56]">
+              We’ll contact you within <strong>24 hours</strong> to discuss your mushroom farming options.
+            </p>
+            <p className="text-sm text-[#6B5D56]">
+              In the meantime, explore our{" "}
+              <Link href="/farm-models" className="text-[#2E5E3E] hover:underline">
+                farm models
+              </Link>
+              .
+            </p>
+            <div className="text-xs text-[#6B5D56] bg-[#F8F4E9] p-3 rounded-md mt-3">
+              Didn’t get a confirmation email? Check spam, or contact us directly at{" "}
+              <br />
+              <a
+                href="mailto:heritagehubnepal@gmail.com"
+                className="text-[#C44536] hover:underline"
+              >
+                heritagehubnepal@gmail.com
+              </a>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setIsSuccessDialogOpen(false)}
+              className="bg-[#C44536] hover:bg-[#b03e30]"
+            >
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
