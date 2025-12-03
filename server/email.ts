@@ -1,49 +1,24 @@
-import { Resend } from 'resend';
-
-let connectionSettings: any;
+import { Resend } from "resend";
 
 async function getCredentials() {
-  // Fallback to local environment variables for local development
-  if (process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
-    console.log("Using local environment variables for Resend");
-    return {
-      apiKey: process.env.RESEND_API_KEY,
-      fromEmail: process.env.RESEND_FROM_EMAIL
-    };
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+
+  if (!apiKey || !fromEmail) {
+    throw new Error(
+      "Resend credentials missing. Please set RESEND_API_KEY and RESEND_FROM_EMAIL in your environment (including Netlify site env vars)."
+    );
   }
 
-  // Replit connector system (production)
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
+  console.log("Using environment variables for Resend");
 
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl. For local development, set RESEND_API_KEY and RESEND_FROM_EMAIL environment variables.');
-  }
-
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=resend',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  if (!connectionSettings || (!connectionSettings.settings.api_key)) {
-    throw new Error('Resend not connected');
-  }
-  return {apiKey: connectionSettings.settings.api_key, fromEmail: connectionSettings.settings.from_email};
+  return { apiKey, fromEmail };
 }
 
 export async function getUncachableResendClient() {
   const { apiKey, fromEmail } = await getCredentials();
   return {
     client: new Resend(apiKey),
-    fromEmail: fromEmail
+    fromEmail,
   };
 }
