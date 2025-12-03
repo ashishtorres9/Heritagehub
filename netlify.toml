@@ -2,11 +2,14 @@
   publish = "dist/public"
   command = "npm run build:netlify"
 
-# SPA fallback so client-side routing works on refresh
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
-  from = "/api/*"
-  to = "/index.html"
+  from = "/api/contact"
+  to = "/.netlify/functions/contact"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
