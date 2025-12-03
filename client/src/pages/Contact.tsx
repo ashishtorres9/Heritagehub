@@ -39,7 +39,7 @@ export default function Contact() {
                 href="tel:+9779800000000"
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                +977 980-0000-000
+                +977 9808390808
               </a>
             </Card>
 
