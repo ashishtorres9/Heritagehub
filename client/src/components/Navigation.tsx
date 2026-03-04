@@ -110,6 +110,19 @@ export default function Navigation() {
                   Get Free Assessment
                 </Button>
               </Link>
+              <a 
+  href="https://election.heritagehubnepal.com"
+  target="_blank" 
+  rel="noopener noreferrer"
+>
+  <Button
+    size="sm"
+    className="bg-destructive text-destructive-foreground hover-elevate active-elevate-2"
+    data-testid="button-get-assessment"
+  >
+    Election Portal
+  </Button>
+</a>
             </div>
           </div>
         )}
