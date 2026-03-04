@@ -115,10 +115,9 @@ export default function Navigation() {
   target="_blank" 
   rel="noopener noreferrer"
 >
-  <Button
-    size="sm"
-    className="bg-destructive text-destructive-foreground hover-elevate active-elevate-2"
-    data-testid="button-get-assessment"
+  <Button    
+    className="w-full bg-destructive text-destructive-foreground hover-elevate active-elevate-2"
+    data-testid="button-mobile-election-portal"
   >
     Election Portal
   </Button>
